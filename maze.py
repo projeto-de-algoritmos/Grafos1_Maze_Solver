@@ -30,9 +30,8 @@ class Graph:
             neighbors = ", ".join(
                 f"({neighbor.x},{neighbor.y})" for neighbor in node.neighbors
             )
-            result += f"({node.x},{node.y}) -> [{neighbors}]\n"
+            result += f"({node.x},{node.y},{node.parent}) -> [{neighbors}]\n"
         return result
-
 
 
 def move(pos: list, direction: str) -> None:
@@ -46,17 +45,18 @@ def move(pos: list, direction: str) -> None:
     if direction == "E":
         x += 1
 
-    return [x,y]
+    return [x, y]
+
 
 def find_dir(parent) -> str:
-        if parent == "N":
-            return "S"
-        if parent == "S":
-            return "N"
-        if parent == "E":
-            return "W"
-        if parent == "W":
-            return "E"
+    if parent == "N":
+        return "S"
+    if parent == "S":
+        return "N"
+    if parent == "E":
+        return "W"
+    if parent == "W":
+        return "E"
 
 
 def is_path(pos: list):
@@ -71,22 +71,15 @@ def scan(pos: list, back: str):
     for d in directions:
         if is_path(move(pos, d)):
             available.append(d)
-
     return available
 
 
 maze_image = cv2.imread("maze.png", cv2.IMREAD_GRAYSCALE)
 
-def create_node(maze_graph, c_pos, last_node, last_direction, scn, corner):
-    c_pos = move([last_node.x, last_node.y], scn[0])
-    new_node = Node(x=c_pos[0], y=c_pos[1], parent=find_dir(last_direction)  if corner else last_direction)
-    maze_graph.add_node(new_node)
-    maze_graph.add_edge(last_node, new_node)
-    last_node = new_node
-    c_pos = [last_node.x, last_node.y]
 
 def create_graph():
     maze_graph = Graph()
+    stack = []
     height, width = maze_image.shape
 
     for x in range(width):
@@ -106,29 +99,29 @@ def create_graph():
     last_node = start
 
     i = 0
-    while i < 4:
+    while i < 6:
         scn = scan(c_pos, last_direction)
-        if len(scn) == 1:
-            if scn != find_dir(last_direction): # If the path changes directions (corner)
-                create_node(maze_graph, c_pos, last_node, last_direction, scn, corner=True)
+        if len(scn) == 1: # Only one way to go
+            if scn[0] != find_dir(last_direction):  # If the path changes directions (corner)
+                new_node = Node(x=c_pos[0], y=c_pos[1], parent=last_direction)
+                maze_graph.add_node(new_node)
+                maze_graph.add_edge(last_node, new_node)
+                last_node = new_node
+                last_direction = find_dir(scn[0])
+                c_pos = move([last_node.x, last_node.y], scn[0])
             else:
-                c_pos = move(c_pos, scn)
+                c_pos = move(c_pos, scn[0])
+        if len(scn) > 1: # Intersection
+            new_node = Node(x=c_pos[0], y=c_pos[1], parent=last_direction)
+            maze_graph.add_node(new_node)
+            maze_graph.add_edge(last_node, new_node)
+            last_node = new_node
+            stack.append(new_node)
+            # TODO: dfs the possible paths
+
+            # c_pos = move([last_node.x, last_node.y], scn[0])
+            print(c_pos, scn)
         i += 1
-
-
-# add new node
-    # c_pos = move([last_node.x, last_node.y], scn[0])
-    # new_node = Node(x=c_pos[0], y=c_pos[1], parent=last_direction)
-    # maze_graph.add_node(new_node)
-    # maze_graph.add_edge(last_node, new_node)
-    # last_node = new_node
-    # c_pos = [last_node.x, last_node.y]
-
-    # elif len(scn) > 2:
-    #     new_node = Node(x=c_pos[0], y=c_pos[1], parent=direc.find(last_direction))
-    #     maze_graph.add_node(new_node)
-    #     maze_graph.add_edge(last_node, new_node)
-    #     last_node = new_node
 
     print(maze_graph)
 
