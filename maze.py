@@ -26,9 +26,6 @@ class Graph:
         self.nodes.append(node)
         return node
 
-    def remove_node(self) -> Node:
-        return self.nodes.pop()
-
     def add_edge(self, node1, node2):
         if node1 not in self.nodes or node2 not in self.nodes:
             raise ValueError("Both nodes must be in the graph.")
@@ -46,48 +43,11 @@ class Graph:
         return result
 
 
-def move(pos: list, direction: str) -> None:
-    x, y = pos
-    if direction == "N":
-        y -= 1
-    if direction == "S":
-        y += 1
-    if direction == "W":
-        x -= 1
-    if direction == "E":
-        x += 1
-
-    return [x, y]
+directions = {"N": [0, -1], "S": [0, 1], "W": [-1, 0], "E": [1, 0]}
 
 
-def paint_nodes(graph):
-    image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
-    draw = ImageDraw.Draw(image_pil)
-    pixel_coordinates = [(n.x, n.y) for n in graph.nodes]
-    pixel_color = (0, 255, 0)
-
-    for coord in pixel_coordinates:
-        draw.point(coord, fill=pixel_color)
-
-    image_pil.save(f"out/nodes.png")
-
-
-def paint_path(path: list):
-    image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
-    draw = ImageDraw.Draw(image_pil)
-    edge_color = (255, 0, 0)
-
-    for node in path:
-        if not node.parent == None:
-            x1 = node.x
-            y1 = node.y
-            x2 = node.parent.x
-            y2 = node.parent.y
-            draw.line([(x1, y1), (x2, y2)], fill=edge_color, width=1)
-        else:
-            draw.point((node.x, node.y), fill=edge_color)
-
-    image_pil.save(f"out/path.png")
+def move(pos: list, direction: list) -> None:
+    return [x + y for x, y in zip(pos, direction)]
 
 
 def is_path(pos: list):
@@ -180,7 +140,6 @@ def bfs(start: Node, end: Node):
         if c_node == end:
             path = []
             while c_node:
-                # print(c_node)
                 path.insert(0, c_node)
                 c_node = c_node.parent
             print("retornando path")
@@ -196,13 +155,40 @@ def bfs(start: Node, end: Node):
     return visited
 
 
+def paint_nodes(graph):
+    image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
+    draw = ImageDraw.Draw(image_pil)
+    pixel_coordinates = [(n.x, n.y) for n in graph.nodes]
+    pixel_color = (0, 255, 0)
+
+    for coord in pixel_coordinates:
+        draw.point(coord, fill=pixel_color)
+
+    image_pil.save(f"out/nodes.png")
+
+
+def paint_path(path: list):
+    image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
+    draw = ImageDraw.Draw(image_pil)
+    edge_color = (255, 0, 0)
+
+    for node in path:
+        if not node.parent == None:
+            x1 = node.x
+            y1 = node.y
+            x2 = node.parent.x
+            y2 = node.parent.y
+            draw.line([(x1, y1), (x2, y2)], fill=edge_color, width=1)
+        else:
+            draw.point((node.x, node.y), fill=edge_color)
+
+    image_pil.save(f"out/path.png")
+
+
 def main():
     graph, visited, start, end = create_graph()
-    # paint_path(visited)
     paint_nodes(graph)
     path = bfs(start, end)
-
-    # print([(p.x, p.y) for p in path])
 
     if path != None:
         paint_path(path)
