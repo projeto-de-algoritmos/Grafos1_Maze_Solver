@@ -4,11 +4,18 @@ import cv2
 
 
 class Node:
-    def __init__(self, x, y, direction) -> None:
+    def __init__(self, x, y, direction, parent) -> None:
         self.x = x
         self.y = y
         self.direction = direction
         self.neighbors = []
+        self.parent = parent
+
+    def __str__(self):
+        parent = f"{self.parent.x},{self.parent.y}" if self.parent != None else None
+        return (
+            f"(Node {self.x},{self.y}), parent: ({parent}) direction: {self.direction}"
+        )
 
 
 class Graph:
@@ -18,6 +25,9 @@ class Graph:
     def add_node(self, node: Node) -> Node:
         self.nodes.append(node)
         return node
+
+    def remove_node(self) -> Node:
+        return self.nodes.pop()
 
     def add_edge(self, node1, node2):
         if node1 not in self.nodes or node2 not in self.nodes:
@@ -62,14 +72,20 @@ def paint_nodes(graph):
     image_pil.save(f"out/nodes.png")
 
 
-def paint_path(visited):
+def paint_path(path: list):
     image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
     draw = ImageDraw.Draw(image_pil)
-    pixel_coordinates = [n for n in visited]
-    pixel_color = (255, 0, 0)
+    edge_color = (255, 0, 0)
 
-    for coord in pixel_coordinates:
-        draw.point(coord, fill=pixel_color)
+    for node in path:
+        if not node.parent == None:
+            x1 = node.x
+            y1 = node.y
+            x2 = node.parent.x
+            y2 = node.parent.y
+            draw.line([(x1, y1), (x2, y2)], fill=edge_color, width=1)
+        else:
+            draw.point((node.x, node.y), fill=edge_color)
 
     image_pil.save(f"out/path.png")
 
@@ -89,7 +105,7 @@ def scan(pos: list, visited: str):
     return available
 
 
-maze_image = cv2.imread("in/41x41.png", cv2.IMREAD_GRAYSCALE)
+maze_image = cv2.imread("in/501x501.png", cv2.IMREAD_GRAYSCALE)
 
 
 def create_graph():
@@ -100,10 +116,10 @@ def create_graph():
 
     for x in range(width):
         if maze_image[0, x] == 255:
-            start = Node(x=x, y=0, direction=" ")
+            start = Node(x=x, y=0, direction=" ", parent=None)
 
         if maze_image[height - 1, x] == 255:
-            end = Node(x=x, y=height - 1, direction=" ")
+            end = Node(x=x, y=height - 1, direction=" ", parent=None)
 
     maze_graph.add_node(start)
     maze_graph.add_node(end)
@@ -120,10 +136,13 @@ def create_graph():
         scn = scan(c_pos, visited)
         if not len(scn):  # dead-end
             last_cross = q.popleft()
-            c_pos = last_cross
-        if len(scn) == 1:  # Only one way to go
+            last_node = last_cross
+            c_pos = [last_cross.x, last_cross.y]
+        elif len(scn) == 1:  # Only one way to go
             if scn[0] != last_direction:  # If the path changes directions (corner)
-                new_node = Node(x=c_pos[0], y=c_pos[1], direction=scn[0])
+                new_node = Node(
+                    x=c_pos[0], y=c_pos[1], direction=scn[0], parent=last_node
+                )
                 maze_graph.add_node(new_node)
                 maze_graph.add_edge(last_node, new_node)
                 last_node = new_node
@@ -133,26 +152,62 @@ def create_graph():
             else:
                 c_pos = move(c_pos, scn[0])
                 visited.add(tuple(c_pos))
-        if len(scn) > 1:  # Intersection
-            new_node = Node(x=c_pos[0], y=c_pos[1], direction=scn[0])
+        elif len(scn) > 1:  # Intersection
+            new_node = Node(x=c_pos[0], y=c_pos[1], direction=scn[0], parent=last_node)
             maze_graph.add_node(new_node)
             maze_graph.add_edge(last_node, new_node)
             last_node = new_node
             visited.add(tuple(c_pos))
-            q.append([last_node.x, last_node.y])
+            q.append(last_node)
             last_direction = scn[0]
             c_pos = move([last_node.x, last_node.y], last_direction)
             if tuple(c_pos) not in visited:
                 visited.add(tuple(c_pos))
+
+    end.parent = last_node
+    maze_graph.add_edge(last_node, end)
     print("Grafo gerado.")
 
-    return maze_graph, visited
+    return maze_graph, visited, start, end
+
+
+def bfs(start: Node, end: Node):
+    visited = set()
+    q = deque([start])
+
+    while q:
+        c_node = q.popleft()
+        if c_node == end:
+            path = []
+            while c_node:
+                # print(c_node)
+                path.insert(0, c_node)
+                c_node = c_node.parent
+            print("retornando path")
+            return path
+
+        visited.add(c_node)
+
+        for neighbor in c_node.neighbors:
+            if neighbor not in visited:
+                q.append(neighbor)
+                visited.add(neighbor)
+
+    return visited
 
 
 def main():
-    graph, visited = create_graph()
-    paint_path(visited)
+    graph, visited, start, end = create_graph()
+    # paint_path(visited)
     paint_nodes(graph)
+    path = bfs(start, end)
+
+    # print([(p.x, p.y) for p in path])
+
+    if path != None:
+        paint_path(path)
+    else:
+        print("Deu ruim.")
 
 
 if __name__ == "__main__":
