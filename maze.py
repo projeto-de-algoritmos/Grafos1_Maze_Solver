@@ -46,15 +46,15 @@ class Graph:
 directions = {"N": [0, -1], "S": [0, 1], "W": [-1, 0], "E": [1, 0]}
 
 
-def move(pos: list, direction: list) -> None:
-    return [x + y for x, y in zip(pos, direction)]
+def move(pos: list, direction: str) -> None:
+    return [x + y for x, y in zip(pos, directions[direction])]
 
 
 def is_path(pos: list):
     return True if maze_image[pos[1], pos[0]] == 255 else False
 
 
-def scan(pos: list, visited: str):
+def scan(pos: list, visited: set):
     directions = ["S", "W", "E", "N"]
     available = []
 
