@@ -26,13 +26,13 @@ def create_graph():
 
     maze_graph = Graph(start, end)
     nav = Navigator(maze_graph, maze_image)
-    queue = deque()
+    stack = deque()
 
     while nav.c_pos != nav.end_pos:
         paths = nav.scan()
         
         if not len(paths):                          # Dead-end
-            nav.backtrack(queue.popleft())
+            nav.backtrack(stack.popleft())
         elif len(paths) == 1:                     
             if paths[0] != nav.last_direction:      # Corner
                 nav.new_node(paths)
@@ -40,7 +40,7 @@ def create_graph():
                 nav.visit(paths)
         elif len(paths) > 1:                        # Intersection
             nav.new_node(paths)
-            queue.append(nav.last_node)
+            stack.appendleft(nav.last_node)
 
     end.parent = nav.last_node
     maze_graph.add_edge(nav.last_node, end)
@@ -72,12 +72,21 @@ def bfs(start: Node, end: Node):
 
     return visited
 
+def test(end):
+    c_node = end
+    path = []
+    while c_node:
+        path.insert(0, c_node)
+        c_node = c_node.parent
+    print("retornando path")
+    return path
+
 
 def paint_nodes(graph):
     image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
     draw = ImageDraw.Draw(image_pil)
     pixel_coordinates = [(n.x, n.y) for n in graph.nodes]
-    pixel_color = (0, 255, 0)
+    pixel_color = (0, 0, 255)
 
     for coord in pixel_coordinates:
         draw.point(coord, fill=pixel_color)
@@ -107,6 +116,7 @@ def main():
     graph, start, end = create_graph()
     paint_nodes(graph)
     path = bfs(start, end)
+    #path = test(end)
 
     if path != None:
         paint_path(path)
