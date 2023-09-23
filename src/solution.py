@@ -1,14 +1,8 @@
 from maze import Graph, Node, Navigator
 from PIL import Image, ImageDraw
 from collections import deque
+from math import ceil
 import cv2
-import sys
-
-if len(sys.argv) == 2:
-    img_name = sys.argv[1]
-    maze_image = cv2.imread(f"../in/{img_name}.png", cv2.IMREAD_GRAYSCALE)
-else:
-    maze_image = cv2.imread(f"../in/41.png", cv2.IMREAD_GRAYSCALE)
 
 
 def create_graph():
@@ -45,34 +39,10 @@ def create_graph():
     maze_graph.add_edge(nav.last_node, end)
     print("Grafo gerado.")
 
-    return maze_graph, start, end
+    return maze_graph, end
 
 
-def bfs(start: Node, end: Node):
-    visited = set()
-    q = deque([start])
-
-    while q:
-        c_node = q.popleft()
-        if c_node == end:
-            path = []
-            while c_node:
-                path.insert(0, c_node)
-                c_node = c_node.parent
-            print("retornando path")
-            return path
-
-        visited.add(c_node)
-
-        for neighbor in c_node.neighbors:
-            if neighbor not in visited:
-                q.append(neighbor)
-                visited.add(neighbor)
-
-    return visited
-
-
-def test(end):
+def find_path(end):
     c_node = end
     path = []
     while c_node:
@@ -94,6 +64,23 @@ def paint_nodes(graph):
     image_pil.save(f"../out/nodes.png")
 
 
+def resize_image(img: Image):
+    width, height = img.size
+    aspect_ratio = width / height
+    target_width = 1000
+
+    if width < target_width or height < target_width:
+        new_width = width * ceil(target_width/width)
+        new_height = int(new_width / aspect_ratio)
+    else:
+        new_height = height
+        new_width = width
+
+    img = img.resize((new_width, new_height), resample=Image.NEAREST)
+
+    return img
+
+
 def paint_path(path: list):
     image_pil = Image.fromarray(cv2.cvtColor(maze_image, cv2.COLOR_GRAY2RGB))
     draw = ImageDraw.Draw(image_pil)
@@ -109,16 +96,16 @@ def paint_path(path: list):
         else:
             draw.point((node.x, node.y), fill=edge_color)
 
+    image_pil = resize_image(image_pil)
     image_pil.save(f"../out/path.png")
 
 
 def solve(img):
     global maze_image
     maze_image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
-    graph, start, end = create_graph()
+    graph, end = create_graph()
     paint_nodes(graph)
-    path = bfs(start, end)
-    # path = test(end)
+    path = find_path(end)
 
     if path != None:
         paint_path(path)
