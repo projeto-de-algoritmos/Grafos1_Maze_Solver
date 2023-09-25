@@ -22,13 +22,40 @@ Adicione 3 ou mais screenshots do projeto em funcionamento.
 ## Instalação
 
 **Linguagem**: Python<br>
-**Framework**: (caso exista)<br>
-Descreva os pré-requisitos para rodar o seu projeto e os comandos necessários.
+
+##### Crie um ambiente virtual:
+
+`$ python3 -m venv venv `
+
+##### Entre no ambiente virtual
+
+`$ . venv/bin/activate`
+ou
+` .\venv\Script\activate`
+
+##### Instale os requirements
+
+`$ pip install -r requirements.txt`
+
+##### Execute a main.py
+
+`$ python3 src/main.py`
+
+##### Pegue o link do gradio
+
+Exemplo:http://127.0.0.1:7860
 
 ## Uso
 
-Explique como usar seu projeto caso haja algum passo a passo após o comando de execução.
+Na interface do gradio:
+
+1.  Escolha um dos exemplos na parte dos examples abaixo de "Clear" e "Submit" ou arraste um dos labirintos gerados pelo projeto [Kruskal Maze Generator](https://github.com/projeto-de-algoritmos/Grafos2_KruskalMazeGenerator) à janela de upload ou clique na janela de upload e suba um labirinto feito pelo mesmo projeto mencionado
+2.  Clique em "Submit" e espere o aplicativo resolver seu labirinto!
 
 ## Outros
 
 Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
+
+```
+
+```
