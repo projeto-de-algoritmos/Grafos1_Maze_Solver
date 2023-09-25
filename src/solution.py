@@ -24,14 +24,14 @@ def create_graph():
     while nav.c_pos != nav.end_pos:
         paths = nav.scan()
 
-        if not len(paths):  # Dead-end
+        if not len(paths):                      # Dead-end
             nav.backtrack(stack.popleft())
         elif len(paths) == 1:
             if paths[0] != nav.last_direction:  # Corner
                 nav.new_node(paths)
-            else:  # Corridor
+            else:                               # Corridor
                 nav.visit(paths)
-        elif len(paths) > 1:  # Intersection
+        elif len(paths) > 1:                    # Intersection
             nav.new_node(paths)
             stack.appendleft(nav.last_node)
 
