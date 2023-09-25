@@ -17,7 +17,9 @@ O objetivo do projeto é criar um algoritmo que resolva um labirinto gerado pelo
 
 ## Screenshots
 
-Adicione 3 ou mais screenshots do projeto em funcionamento.
+![1](img/image-2.png)
+![2](img/image.png)
+![3](img/image-1.png)
 
 ## Instalação
 
@@ -52,10 +54,3 @@ Na interface do gradio:
 1.  Escolha um dos exemplos na parte dos examples abaixo de "Clear" e "Submit" ou arraste um dos labirintos gerados pelo projeto [Kruskal Maze Generator](https://github.com/projeto-de-algoritmos/Grafos2_KruskalMazeGenerator) à janela de upload ou clique na janela de upload e suba um labirinto feito pelo mesmo projeto mencionado
 2.  Clique em "Submit" e espere o aplicativo resolver seu labirinto!
 
-## Outros
-
-Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
-
-```
-
-```
