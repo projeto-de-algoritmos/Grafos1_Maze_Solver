@@ -61,7 +61,7 @@ def paint_nodes(graph):
     for coord in pixel_coordinates:
         draw.point(coord, fill=pixel_color)
 
-    image_pil.save(f"../out/nodes.png")
+    image_pil.save("out/nodes.png")
 
 
 def resize_image(img: Image):
@@ -97,7 +97,7 @@ def paint_path(path: list):
             draw.point((node.x, node.y), fill=edge_color)
 
     image_pil = resize_image(image_pil)
-    image_pil.save(f"../out/path.png")
+    image_pil.save("out/path.png")
 
 
 def solve(img):
@@ -109,7 +109,7 @@ def solve(img):
 
     if path != None:
         paint_path(path)
-        solved_image = cv2.imread("../out/path.png")
+        solved_image = cv2.imread("out/path.png")
         return solved_image
     else:
         print("Deu ruim.")
